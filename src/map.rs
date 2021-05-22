@@ -32,6 +32,26 @@ impl Map {
             }
         }
     }
+
+    pub fn is_in_bounds(&self, point: Point) -> bool {
+        point.x >= 0
+            && point.x < SCREEN_WIDTH as i32
+            && point.y >= 0
+            && point.y < SCREEN_HEIGHT as i32
+    }
+
+    pub fn can_enter_tile(&self, point: Point) -> bool {
+        self.is_in_bounds(point)
+            && self.tiles[map_idx(point.x as u32, point.x as u32)] == TileType::Floor
+    }
+
+    pub fn try_idx(&self, point: Point) -> Option<usize> {
+        if !self.is_in_bounds(point) {
+            None
+        } else {
+            Some(map_idx(point.x as u32, point.y as u32))
+        }
+    }
 }
 
 pub fn map_idx(x: u32, y: u32) -> usize {
