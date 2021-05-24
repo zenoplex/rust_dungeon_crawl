@@ -46,9 +46,8 @@ impl MapBuilder {
 
             if !overlap {
                 room.for_each(|p| {
-                    if p.x > 0 && p.x < SCREEN_WIDTH as i32 && p.y > 0 && p.y < SCREEN_HEIGHT as i32
-                    {
-                        let idx = map_idx(p.x as u32, p.y as u32);
+                    if p.x > 0 && p.x < SCREEN_WIDTH && p.y > 0 && p.y < SCREEN_HEIGHT {
+                        let idx = map_idx(p.x, p.y);
                         self.map.tiles[idx] = TileType::Floor;
                     }
                 });
