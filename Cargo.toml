@@ -1,5 +1,5 @@
 [package]
-name = "rust-rougelike"
+name = "rust_dungeon_crawl"
 version = "0.1.0"
 authors = ["Gen Ichino <zenoplex@gmail.com>"]
 edition = "2018"
@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 bracket-lib = "0.8.1"
+legion = "0.4.0"
