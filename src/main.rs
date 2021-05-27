@@ -37,6 +37,12 @@ impl GameState for State {
         ctx.set_active_console(1);
         ctx.cls();
 
+        if cfg!(debug_assertions) {
+            let mut draw_batch = DrawBatch::new();
+            draw_batch.print(Point::zero(), ctx.fps);
+            draw_batch.submit(1000000).expect("Batch error");
+        }
+
         self.resources.insert(ctx.key);
         self.systems.execute(&mut self.ecs, &mut self.resources);
         render_draw_buffer(ctx).expect("Render error");
