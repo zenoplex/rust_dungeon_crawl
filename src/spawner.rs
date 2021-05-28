@@ -24,5 +24,6 @@ pub fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator)
                 _ => to_cp437('g'),
             },
         },
+        MovingRandomly,
     ));
 }
