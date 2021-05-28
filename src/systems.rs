@@ -2,6 +2,7 @@ mod collisions;
 mod end_turn;
 mod entity_render;
 mod map_render;
+mod movements;
 mod player_input;
 mod random_move;
 
