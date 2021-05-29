@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[read_component(Point)]
 #[read_component(Health)]
 pub fn tooltip(ecs: &mut SubWorld, #[resource] mouse_pos: &Point, #[resource] camera: &Camera) {
-    let mut positions = <(Entity, &Point, &Name, &Health)>::query();
+    let mut positions = <(Entity, &Point, &Name)>::query();
     let offset = Point::new(camera.left_x, camera.top_y);
     let map_pos = *mouse_pos + offset;
     let mut draw_batch = DrawBatch::new();
@@ -13,14 +13,17 @@ pub fn tooltip(ecs: &mut SubWorld, #[resource] mouse_pos: &Point, #[resource] ca
 
     positions
         .iter(ecs)
-        .filter(|(_, pos, _, _)| **pos == map_pos)
-        .for_each(|(entity, _, name, health)| {
+        .filter(|(_, pos, _)| **pos == map_pos)
+        .for_each(|(entity, _, name)| {
             // align screen position because layer 2 is bigger
             let screen_pos = *mouse_pos * 4;
-            println!("{:?}", health);
 
-            // TODO: try entry_try
-            let display = format!("{} : {} hp", &name.0, health.current);
+            let display =
+                if let Ok(health) = ecs.entry_ref(*entity).unwrap().get_component::<Health>() {
+                    format!("{} : {} hp", &name.0, health.current)
+                } else {
+                    name.0.clone()
+                };
 
             draw_batch.print(screen_pos, display);
         });
