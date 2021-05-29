@@ -24,7 +24,6 @@ impl Map {
     }
 
     pub fn can_enter_tile(&self, point: Point) -> bool {
-        println!("point: {:?}", &point);
         self.is_in_bounds(point) && self.tiles[map_idx(point.x, point.y)] == TileType::Floor
     }
 
