@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[system(for_each)]
 #[read_component(Player)]
-pub fn movement(
+pub fn movements(
     entity: &Entity,
     want_move: &WantsToMove,
     #[resource] map: &Map,

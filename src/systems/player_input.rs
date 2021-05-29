@@ -5,10 +5,9 @@ use crate::prelude::*;
 #[read_component(Player)]
 pub fn player_input(
     ecs: &mut SubWorld,
-    #[resource] map: &Map,
     #[resource] key: &Option<VirtualKeyCode>,
-    #[resource] camera: &mut Camera,
     #[resource] turn_state: &mut TurnState,
+    commands: &mut CommandBuffer,
 ) {
     if let Some(key) = key {
         let delta = match key {
@@ -19,17 +18,19 @@ pub fn player_input(
             _ => Point::zero(),
         };
 
-        if delta.x != 0 || delta.y != 0 {
-            // Query entity with Points and Player only
-            let mut players = <&mut Point>::query().filter(component::<Player>());
-            players.iter_mut(ecs).for_each(|pos| {
-                let destination = *pos + delta;
-                if map.can_enter_tile(destination) {
-                    *pos = destination;
-                    camera.on_player_move(destination);
-                    *turn_state = TurnState::PlayerTurn;
-                }
-            })
-        }
+        // Query entity with Points and Player only
+        let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
+        players.iter(ecs).for_each(|(entity, pos)| {
+            let destination = *pos + delta;
+            commands.push((
+                // Legion does not support single component insertion
+                (),
+                WantsToMove {
+                    entity: *entity,
+                    destination,
+                },
+            ));
+            *turn_state = TurnState::EnemyTurn;
+        })
     }
 }
