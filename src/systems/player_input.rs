@@ -60,6 +60,6 @@ pub fn player_input(
             }
         }
         // Maybe should give turn only after player delta is arrow key
-        *turn_state = TurnState::EnemyTurn;
+        *turn_state = TurnState::PlayerTurn;
     }
 }
