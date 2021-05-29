@@ -20,17 +20,46 @@ pub fn player_input(
 
         // Query entity with Points and Player only
         let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
-        players.iter(ecs).for_each(|(entity, pos)| {
-            let destination = *pos + delta;
-            commands.push((
-                // Legion does not support single component insertion
-                (),
-                WantsToMove {
-                    entity: *entity,
-                    destination,
-                },
-            ));
-            *turn_state = TurnState::EnemyTurn;
-        })
+
+        let (player_entity, destination) = players
+            .iter(ecs)
+            .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
+            .unwrap();
+
+        let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());
+
+        if delta != Point::zero() {
+            let mut hit_something = false;
+
+            enemies
+                .iter(ecs)
+                .filter(|(_, pos)| **pos == destination)
+                .for_each(|(enemy_entity, _)| {
+                    hit_something = true;
+
+                    println!("hit");
+
+                    commands.push((
+                        (),
+                        WantsToAttack {
+                            attacker: player_entity,
+                            victim: *enemy_entity,
+                        },
+                    ));
+                });
+
+            if !hit_something {
+                commands.push((
+                    // Legion does not support single component insertion
+                    (),
+                    WantsToMove {
+                        entity: player_entity,
+                        destination,
+                    },
+                ));
+            }
+        }
+        // Maybe should give turn only after player delta is arrow key
+        *turn_state = TurnState::PlayerTurn;
     }
 }
