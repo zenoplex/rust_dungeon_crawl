@@ -32,7 +32,7 @@ pub fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator)
             current: hp,
             max: hp,
         },
-        MovingRandomly,
+        ChasingPlayer,
         Name(name),
     ));
 }
