@@ -3,6 +3,8 @@ use crate::prelude::*;
 #[system]
 #[write_component(Point)]
 #[read_component(Player)]
+#[read_component(Enemy)]
+#[write_component(Health)]
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource] key: &Option<VirtualKeyCode>,
@@ -28,6 +30,8 @@ pub fn player_input(
 
         let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());
 
+        let mut did_something = false;
+
         if delta != Point::zero() {
             let mut hit_something = false;
 
@@ -36,6 +40,7 @@ pub fn player_input(
                 .filter(|(_, pos)| **pos == destination)
                 .for_each(|(enemy_entity, _)| {
                     hit_something = true;
+                    did_something = true;
 
                     println!("hit");
 
@@ -49,6 +54,7 @@ pub fn player_input(
                 });
 
             if !hit_something {
+                did_something = true;
                 commands.push((
                     // Legion does not support single component insertion
                     (),
@@ -59,6 +65,17 @@ pub fn player_input(
                 ));
             }
         }
+
+        if !did_something {
+            if let Ok(mut health) = ecs
+                .entry_mut(player_entity)
+                .unwrap()
+                .get_component_mut::<Health>()
+            {
+                health.current = std::cmp::min(health.current + 1, health.max);
+            }
+        }
+
         // Maybe should give turn only after player delta is arrow key
         *turn_state = TurnState::PlayerTurn;
     }
