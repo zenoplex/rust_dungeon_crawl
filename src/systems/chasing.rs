@@ -22,7 +22,7 @@ pub fn chasing(ecs: &SubWorld, #[resource] map: &Map, commands: &mut CommandBuff
             if let Some(destination) = DijkstraMap::find_lowest_exit(&dijkstar_map, idx, map) {
                 let distance = DistanceAlg::Pythagoras.distance2d(*pos, *player_pos);
 
-                // 1.2 ensures distance is bigger than 1.0 and 1.4 which is approx of diagonal distance
+                // 1.2 ensures distance is bigger than 1.0 and less than 1.4 which is approx of diagonal distance
                 let destination = if distance > 1.2 {
                     map.index_to_point2d(destination)
                 } else {
