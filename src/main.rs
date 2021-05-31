@@ -84,6 +84,8 @@ impl State {
             spawn_enemy(&mut ecs, room.center(), &mut rng);
         });
 
+        spawn_amulet_of_yala(&mut ecs, map_builder.amulet_start);
+
         resources.insert(map_builder.map);
         resources.insert(Camera::new(map_builder.player_start));
         resources.insert(TurnState::AwaitingInput);
