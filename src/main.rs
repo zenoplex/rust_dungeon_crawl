@@ -65,7 +65,6 @@ impl GameState for State {
             TurnState::EnemyTurn => self
                 .enemy_systems
                 .execute(&mut self.ecs, &mut self.resources),
-            // TODO: Implement GameOver screen
             TurnState::GameOver => self.game_over(ctx),
         }
 
