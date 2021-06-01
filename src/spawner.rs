@@ -12,6 +12,7 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
             current: 20,
             max: 20,
         },
+        FieldOfView::new(8),
     ));
 }
 
@@ -34,6 +35,7 @@ pub fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator)
         },
         ChasingPlayer,
         Name(name),
+        FieldOfView::new(6),
     ));
 }
 
