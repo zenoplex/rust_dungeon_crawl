@@ -66,6 +66,7 @@ impl GameState for State {
                 .enemy_systems
                 .execute(&mut self.ecs, &mut self.resources),
             TurnState::GameOver => self.game_over(ctx),
+            TurnState::Victory => self.victory(ctx),
         }
 
         render_draw_buffer(ctx).expect("Render error");
@@ -84,6 +85,8 @@ impl State {
             spawn_enemy(&mut ecs, room.center(), &mut rng);
         });
 
+        spawn_amulet_of_yala(&mut ecs, map_builder.amulet_start);
+
         resources.insert(map_builder.map);
         resources.insert(Camera::new(map_builder.player_start));
         resources.insert(TurnState::AwaitingInput);
@@ -94,6 +97,24 @@ impl State {
             player_systems: build_player_scheduler(),
             enemy_systems: build_enemy_scheduler(),
         }
+    }
+
+    fn reset_game_state(&mut self) {
+        self.ecs = World::default();
+        self.resources = Resources::default();
+        let mut rng = RandomNumberGenerator::new();
+        let map_builder = MapBuilder::new(&mut rng);
+        spawn_player(&mut self.ecs, map_builder.player_start);
+
+        map_builder.rooms.iter().skip(1).for_each(|room| {
+            spawn_enemy(&mut self.ecs, room.center(), &mut rng);
+        });
+
+        spawn_amulet_of_yala(&mut self.ecs, map_builder.amulet_start);
+
+        self.resources.insert(map_builder.map);
+        self.resources.insert(Camera::new(map_builder.player_start));
+        self.resources.insert(TurnState::AwaitingInput);
     }
 
     fn game_over(&mut self, ctx: &mut BTerm) {
@@ -120,19 +141,29 @@ impl State {
         ctx.print_color_centered(9, GREEN, BLACK, "Press 1 to play again");
 
         if let Some(VirtualKeyCode::Key1) = ctx.key {
-            self.ecs = World::default();
-            self.resources = Resources::default();
-            let mut rng = RandomNumberGenerator::new();
-            let map_builder = MapBuilder::new(&mut rng);
-            spawn_player(&mut self.ecs, map_builder.player_start);
+            self.reset_game_state();
+        }
+    }
 
-            map_builder.rooms.iter().skip(1).for_each(|room| {
-                spawn_enemy(&mut self.ecs, room.center(), &mut rng);
-            });
+    fn victory(&mut self, ctx: &mut BTerm) {
+        ctx.set_active_console(2);
+        ctx.print_color_centered(2, GREEN, BLACK, "You have won!");
+        ctx.print_color_centered(
+            4,
+            WHITE,
+            BLACK,
+            "You put on the Amulet of YALA and feel its power course through your veins.",
+        );
+        ctx.print_color_centered(
+            5,
+            WHITE,
+            BLACK,
+            "You town is saved, and you can return to your normal life.",
+        );
+        ctx.print_color_centered(7, GREEN, BLACK, "Press 1 to play again.");
 
-            self.resources.insert(map_builder.map);
-            self.resources.insert(Camera::new(map_builder.player_start));
-            self.resources.insert(TurnState::AwaitingInput);
+        if let Some(VirtualKeyCode::Key1) = ctx.key {
+            self.reset_game_state();
         }
     }
 }
