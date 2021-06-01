@@ -66,6 +66,8 @@ impl GameState for State {
                 .enemy_systems
                 .execute(&mut self.ecs, &mut self.resources),
             TurnState::GameOver => self.game_over(ctx),
+            // TODO: Add victory screen
+            TurnState::Victory => (),
         }
 
         render_draw_buffer(ctx).expect("Render error");
