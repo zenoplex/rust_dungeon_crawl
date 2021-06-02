@@ -15,11 +15,12 @@ pub fn entity_render(ecs: &mut SubWorld, #[resource] camera: &Camera) {
     let mut fov = <&FieldOfView>::query().filter(component::<Player>());
     let player_fov = fov.iter(ecs).next().unwrap();
 
-    entities.iter(ecs).for_each(|(pos, render)| {
-        if player_fov.visible_tiles.contains(pos) {
+    entities
+        .iter(ecs)
+        .filter(|(pos, _)| player_fov.visible_tiles.contains(pos))
+        .for_each(|(pos, render)| {
             draw_batch.set(*pos - offset, render.color, render.glyph);
-        }
-    });
+        });
 
     draw_batch.submit(5000).expect("Batch error");
 }
