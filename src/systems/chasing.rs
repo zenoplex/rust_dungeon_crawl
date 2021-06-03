@@ -5,8 +5,9 @@ use crate::prelude::*;
 #[read_component(ChasingPlayer)]
 #[read_component(Health)]
 #[read_component(Player)]
+#[read_component(FieldOfView)]
 pub fn chasing(ecs: &SubWorld, #[resource] map: &Map, commands: &mut CommandBuffer) {
-    let mut movers = <(Entity, &Point, &ChasingPlayer)>::query();
+    let mut movers = <(Entity, &Point, &ChasingPlayer, &FieldOfView)>::query();
     let mut positions = <(Entity, &Point, &Health)>::query();
     let mut player = <(&Point, &Player)>::query();
 
@@ -17,7 +18,12 @@ pub fn chasing(ecs: &SubWorld, #[resource] map: &Map, commands: &mut CommandBuff
         let dijkstar_map =
             DijkstraMap::new(SCREEN_WIDTH, SCREEN_HEIGHT, &search_targes, map, 1024.0);
 
-        movers.iter(ecs).for_each(|(enemy_entity, pos, _)| {
+        movers.iter(ecs).for_each(|(enemy_entity, pos, _, fov)| {
+            // Do nothing if player is not in sight
+            if !fov.visible_tiles.contains(player_pos) {
+                return;
+            }
+
             let idx = map_idx(pos.x, pos.y);
             if let Some(destination) = DijkstraMap::find_lowest_exit(&dijkstar_map, idx, map) {
                 let distance = DistanceAlg::Pythagoras.distance2d(*pos, *player_pos);
