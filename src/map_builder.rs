@@ -1,8 +1,11 @@
 mod empty;
+mod rooms;
 
 use crate::prelude::*;
 use empty::EmptyArchitect;
+use rooms::RoomsArchitect;
 
+const NUM_ROOMS: usize = 20;
 const UNREACHABLE: &f32 = &f32::MAX;
 
 pub struct MapBuilder {
@@ -15,7 +18,7 @@ pub struct MapBuilder {
 
 impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-        let mut architect = EmptyArchitect {};
+        let mut architect = RoomsArchitect {};
         architect.new(rng)
     }
 
@@ -45,6 +48,41 @@ impl MapBuilder {
 
         self.map.index_to_point2d(farthest_idx)
     }
+
+    fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
+        // Try to create 20 rooms without intersecting each other
+        while self.rooms.len() < NUM_ROOMS {
+            let room = Rect::with_size(
+                rng.range(1, SCREEN_WIDTH - 10),
+                rng.range(1, SCREEN_HEIGHT - 10),
+                rng.range(2, 10),
+                rng.range(2, 10),
+            );
+
+            let mut overlap = false;
+            for r in self.rooms.iter() {
+                if r.intersect(&room) {
+                    overlap = true;
+                    break;
+                }
+            }
+
+            if !overlap {
+                // Rect.for_each returns every point in Rect
+                room.for_each(|p| {
+                    println!("point {:?}", p);
+                    if p.x > 0 && p.x < SCREEN_WIDTH && p.y > 0 && p.y < SCREEN_HEIGHT {
+                        let idx = map_idx(p.x, p.y);
+                        self.map.tiles[idx] = TileType::Floor;
+                    }
+                });
+
+                self.rooms.push(room);
+            }
+        }
+    }
+
+    fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {}
 }
 
 trait MapArchitect {
