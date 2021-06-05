@@ -50,6 +50,29 @@ impl MapBuilder {
         self.map.tiles.iter_mut().for_each(|t| *t = tile);
     }
 
+    fn find_most_distant(&self) -> Point {
+        let dijkstra_map = DijkstraMap::new(
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            &[self.map.point2d_to_index(self.player_start)],
+            &self.map,
+            1024.0,
+        );
+
+        // Derive map index via enumerate
+        let farthest_idx = dijkstra_map
+            .map
+            .iter()
+            .enumerate()
+            .filter(|(_, dist)| *dist < UNREACHABLE)
+            // Compare dijkstra value and get max
+            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+            .unwrap()
+            .0;
+
+        self.map.index_to_point2d(farthest_idx)
+    }
+
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
         while self.rooms.len() < NUM_ROOMS {
             let room = Rect::with_size(
