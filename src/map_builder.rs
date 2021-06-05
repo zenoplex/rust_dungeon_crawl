@@ -1,3 +1,5 @@
+mod empty;
+
 use crate::prelude::*;
 use std::cmp::{max, min};
 
@@ -137,4 +139,8 @@ impl MapBuilder {
             }
         }
     }
+}
+
+trait MapArchitect {
+    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
 }
