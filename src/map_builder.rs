@@ -82,6 +82,7 @@ impl MapBuilder {
         }
     }
 
+    // TODO: build corridors
     fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {}
 }
 
