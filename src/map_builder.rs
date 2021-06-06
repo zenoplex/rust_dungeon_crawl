@@ -4,6 +4,7 @@ mod rooms;
 use crate::prelude::*;
 use empty::EmptyArchitect;
 use rooms::RoomsArchitect;
+use std::cmp::{max, min};
 
 const NUM_ROOMS: usize = 20;
 const UNREACHABLE: &f32 = &f32::MAX;
@@ -82,8 +83,39 @@ impl MapBuilder {
         }
     }
 
-    // TODO: build corridors
-    fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {}
+    fn apply_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
+        for x in min(x1, x2)..=max(x1, x2) {
+            if let Some(idx) = self.map.try_idx(Point::new(x, y)) {
+                self.map.tiles[idx] = TileType::Floor;
+            }
+        }
+    }
+
+    fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
+        for y in min(y1, y2)..=max(y1, y2) {
+            if let Some(idx) = self.map.try_idx(Point::new(x, y)) {
+                self.map.tiles[idx] = TileType::Floor;
+            }
+        }
+    }
+
+    fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {
+        let mut rooms = self.rooms.clone();
+        rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
+
+        for (i, room) in rooms.iter().enumerate().skip(1) {
+            let prev_pos = rooms[i - 1].center();
+            let new_pos = room.center();
+
+            if rng.range(0, 2) == 1 {
+                self.apply_horizontal_tunnel(prev_pos.x, new_pos.x, prev_pos.y);
+                self.apply_vertical_tunnel(prev_pos.y, new_pos.y, new_pos.x);
+            } else {
+                self.apply_horizontal_tunnel(new_pos.x, prev_pos.x, new_pos.y);
+                self.apply_vertical_tunnel(new_pos.y, prev_pos.y, prev_pos.x);
+            }
+        }
+    }
 }
 
 trait MapArchitect {
