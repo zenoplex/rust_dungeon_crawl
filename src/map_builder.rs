@@ -129,7 +129,7 @@ impl MapBuilder {
             .filter(|(i, tile)| {
                 **tile == TileType::Floor
                     && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*i))
-                        < 10.0
+                        > 10.0
             })
             .map(|(i, _)| self.map.index_to_point2d(i))
             .collect();
