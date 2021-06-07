@@ -68,6 +68,8 @@ impl CellularAutomataArchitect {
                 }
             }
         }
+
+        map.tiles = new_tiles;
     }
 
     fn find_start(&self, map: &Map) -> Point {
