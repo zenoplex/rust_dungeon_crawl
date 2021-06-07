@@ -5,13 +5,22 @@ pub struct CellularAutomataArchitect {}
 
 impl MapArchitect for CellularAutomataArchitect {
     fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
-        let mb = MapBuilder {
+        let mut mb = MapBuilder {
             map: Map::new(),
             rooms: vec![],
             monster_spawns: vec![],
             player_start: Point::zero(),
             amulet_start: Point::zero(),
         };
+
+        self.random_noise_map(rng, &mut mb.map);
+        for _ in 0..10 {
+            self.iteration(&mut mb.map);
+        }
+        let start = self.find_start(&mb.map);
+        mb.monster_spawns = mb.spawn_enemies(&start, rng);
+        mb.player_start = start;
+        mb.amulet_start = mb.find_most_distant();
 
         mb
     }

@@ -1,12 +1,15 @@
+mod automata;
 mod empty;
 mod rooms;
 
 use crate::prelude::*;
+use automata::CellularAutomataArchitect;
 use empty::EmptyArchitect;
 use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 
 const NUM_ROOMS: usize = 20;
+const NUM_MONSTERS: usize = 50;
 const UNREACHABLE: &f32 = &f32::MAX;
 
 pub struct MapBuilder {
@@ -19,7 +22,7 @@ pub struct MapBuilder {
 
 impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-        let mut architect = RoomsArchitect {};
+        let mut architect = CellularAutomataArchitect {};
         architect.new(rng)
     }
 
@@ -115,6 +118,30 @@ impl MapBuilder {
                 self.apply_vertical_tunnel(new_pos.y, prev_pos.y, prev_pos.x);
             }
         }
+    }
+
+    fn spawn_enemies(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
+        let mut spawnable_tiles: Vec<Point> = self
+            .map
+            .tiles
+            .iter()
+            .enumerate()
+            .filter(|(i, tile)| {
+                **tile == TileType::Floor
+                    && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*i))
+                        < 10.0
+            })
+            .map(|(i, _)| self.map.index_to_point2d(i))
+            .collect();
+
+        let mut spawns: Vec<Point> = Vec::with_capacity(NUM_MONSTERS);
+        for _ in 0..NUM_MONSTERS {
+            let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
+            spawns.push(spawnable_tiles[target_index]);
+            spawnable_tiles.remove(target_index);
+        }
+
+        spawns
     }
 }
 
