@@ -1,56 +1,60 @@
+mod automata;
+mod empty;
+mod rooms;
+
 use crate::prelude::*;
+use automata::CellularAutomataArchitect;
+use empty::EmptyArchitect;
+use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 
 const NUM_ROOMS: usize = 20;
+const NUM_MONSTERS: usize = 50;
 const UNREACHABLE: &f32 = &f32::MAX;
 
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
+    pub monster_spawns: Vec<Point>,
     pub player_start: Point,
     pub amulet_start: Point,
 }
 
 impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-        let mut mb = MapBuilder {
-            map: Map::new(),
-            rooms: Vec::new(),
-            player_start: Point::zero(),
-            amulet_start: Point::zero(),
-        };
-
-        mb.fill(TileType::Wall);
-        mb.build_random_rooms(rng);
-        mb.build_corridors(rng);
-        mb.player_start = mb.rooms[0].center();
-
-        let dijkstra_map = DijkstraMap::new(
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            &[mb.map.point2d_to_index(mb.player_start)],
-            &mb.map,
-            1024.0,
-        );
-
-        let farest_idx = dijkstra_map
-            .map
-            .iter()
-            .enumerate()
-            .filter(|(_, dist)| *dist < UNREACHABLE)
-            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
-            .unwrap()
-            .0;
-
-        mb.amulet_start = mb.map.index_to_point2d(farest_idx);
-        mb
+        let mut architect = CellularAutomataArchitect {};
+        architect.new(rng)
     }
 
     fn fill(&mut self, tile: TileType) {
         self.map.tiles.iter_mut().for_each(|t| *t = tile);
     }
 
+    fn find_most_distant(&self) -> Point {
+        let dijkstra_map = DijkstraMap::new(
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            &[self.map.point2d_to_index(self.player_start)],
+            &self.map,
+            1024.0,
+        );
+
+        // Derive map index via enumerate
+        let farthest_idx = dijkstra_map
+            .map
+            .iter()
+            .enumerate()
+            .filter(|(_, dist)| *dist < UNREACHABLE)
+            // Compare dijkstra value and get max
+            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+            .unwrap()
+            .0;
+
+        self.map.index_to_point2d(farthest_idx)
+    }
+
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
+        // Try to create 20 rooms without intersecting each other
         while self.rooms.len() < NUM_ROOMS {
             let room = Rect::with_size(
                 rng.range(1, SCREEN_WIDTH - 10),
@@ -58,16 +62,19 @@ impl MapBuilder {
                 rng.range(2, 10),
                 rng.range(2, 10),
             );
-            let mut overlap = false;
 
+            let mut overlap = false;
             for r in self.rooms.iter() {
                 if r.intersect(&room) {
                     overlap = true;
+                    break;
                 }
             }
 
             if !overlap {
+                // Rect.for_each returns every point in Rect
                 room.for_each(|p| {
+                    println!("point {:?}", p);
                     if p.x > 0 && p.x < SCREEN_WIDTH && p.y > 0 && p.y < SCREEN_HEIGHT {
                         let idx = map_idx(p.x, p.y);
                         self.map.tiles[idx] = TileType::Floor;
@@ -75,14 +82,6 @@ impl MapBuilder {
                 });
 
                 self.rooms.push(room);
-            }
-        }
-    }
-
-    fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
-        for y in min(y1, y2)..=max(y1, y2) {
-            if let Some(idx) = self.map.try_idx(Point::new(x, y)) {
-                self.map.tiles[idx] = TileType::Floor;
             }
         }
     }
@@ -95,23 +94,57 @@ impl MapBuilder {
         }
     }
 
+    fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
+        for y in min(y1, y2)..=max(y1, y2) {
+            if let Some(idx) = self.map.try_idx(Point::new(x, y)) {
+                self.map.tiles[idx] = TileType::Floor;
+            }
+        }
+    }
+
     fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {
         let mut rooms = self.rooms.clone();
         rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
 
         for (i, room) in rooms.iter().enumerate().skip(1) {
-            let prev = rooms[i - 1].center();
-            let new = room.center();
+            let prev_pos = rooms[i - 1].center();
+            let new_pos = room.center();
 
             if rng.range(0, 2) == 1 {
-                // most likely tunnel on right side
-                self.apply_horizontal_tunnel(prev.x, new.x, prev.y);
-                self.apply_vertical_tunnel(prev.y, new.y, new.x);
+                self.apply_horizontal_tunnel(prev_pos.x, new_pos.x, prev_pos.y);
+                self.apply_vertical_tunnel(prev_pos.y, new_pos.y, new_pos.x);
             } else {
-                // most likely tunnel on left side
-                self.apply_vertical_tunnel(prev.y, new.y, prev.x);
-                self.apply_horizontal_tunnel(prev.x, new.x, new.y);
+                self.apply_horizontal_tunnel(new_pos.x, prev_pos.x, new_pos.y);
+                self.apply_vertical_tunnel(new_pos.y, prev_pos.y, prev_pos.x);
             }
         }
     }
+
+    fn spawn_enemies(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
+        let mut spawnable_tiles: Vec<Point> = self
+            .map
+            .tiles
+            .iter()
+            .enumerate()
+            .filter(|(i, tile)| {
+                **tile == TileType::Floor
+                    && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*i))
+                        > 10.0
+            })
+            .map(|(i, _)| self.map.index_to_point2d(i))
+            .collect();
+
+        let mut spawns: Vec<Point> = Vec::with_capacity(NUM_MONSTERS);
+        for _ in 0..NUM_MONSTERS {
+            let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
+            spawns.push(spawnable_tiles[target_index]);
+            spawnable_tiles.remove(target_index);
+        }
+
+        spawns
+    }
+}
+
+trait MapArchitect {
+    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
 }
