@@ -20,6 +20,7 @@ impl MapArchitect for DrunkardsWalkArchitect {
         let center = Point::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
         self.drunkard(&center, rng, &mut mb.map);
 
+        // Loop until Floor is filled to DESIRED_FLOOR count
         while mb
             .map
             .tiles
@@ -28,12 +29,14 @@ impl MapArchitect for DrunkardsWalkArchitect {
             .count()
             < DESIRED_FLOOR
         {
+            // Start drunkard from random points
             self.drunkard(
                 &Point::new(rng.range(0, SCREEN_WIDTH), rng.range(0, SCREEN_HEIGHT)),
                 rng,
                 &mut mb.map,
             );
 
+            // Create dijkstra map and fill tiles that is 2000 tiles away with Wall so random walk is most likely connect to starting point
             let dijkastra_map = DijkstraMap::new(
                 SCREEN_WIDTH,
                 SCREEN_HEIGHT,
