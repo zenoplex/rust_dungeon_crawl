@@ -1,4 +1,4 @@
-use super::MapArchitect;
+use super::{themes, MapArchitect};
 use crate::prelude::*;
 
 pub struct RoomsArchitect {}
@@ -11,6 +11,7 @@ impl MapArchitect for RoomsArchitect {
             monster_spawns: vec![],
             player_start: Point::zero(),
             amulet_start: Point::zero(),
+            theme: themes::DungeonTheme::new(),
         };
         mb.fill(TileType::Wall);
         mb.build_random_rooms(rng);

@@ -1,4 +1,4 @@
-use super::MapArchitect;
+use super::{themes, MapArchitect};
 use crate::prelude::*;
 
 pub struct EmptyArchitect {}
@@ -11,6 +11,7 @@ impl MapArchitect for EmptyArchitect {
             monster_spawns: vec![],
             amulet_start: Point::zero(),
             player_start: Point::zero(),
+            theme: themes::DungeonTheme::new(),
         };
 
         mb.fill(TileType::Floor);
