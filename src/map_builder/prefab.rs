@@ -1,4 +1,3 @@
-use super::MapArchitect;
 use crate::prelude::*;
 
 const FORTRESS: &str = "
@@ -14,22 +13,6 @@ const FORTRESS: &str = "
 ---######---
 ------------
 ";
-
-struct PrefabArchitect {}
-
-impl MapArchitect for PrefabArchitect {
-    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
-        let mb = MapBuilder {
-            map: Map::new(),
-            rooms: Vec::new(),
-            monster_spawns: Vec::new(),
-            player_start: Point::zero(),
-            amulet_start: Point::zero(),
-        };
-
-        mb
-    }
-}
 
 pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     let mut placement = None;
