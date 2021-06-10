@@ -7,6 +7,7 @@ mod rooms;
 use crate::prelude::*;
 use automata::CellularAutomataArchitect;
 use drunkard::DrunkardsWalkArchitect;
+use prefab::apply_prefab;
 use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 
@@ -30,7 +31,9 @@ impl MapBuilder {
             _ => Box::new(CellularAutomataArchitect {}),
         };
 
-        architect.new(rng)
+        let mut mb = architect.new(rng);
+        apply_prefab(&mut mb, rng);
+        mb
     }
 
     fn fill(&mut self, tile: TileType) {
