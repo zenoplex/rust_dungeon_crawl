@@ -12,6 +12,8 @@ use prefab::apply_prefab;
 use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 
+use self::themes::{DungeonTheme, ForestTheme};
+
 const NUM_ROOMS: usize = 20;
 const NUM_MONSTERS: usize = 50;
 const UNREACHABLE: &f32 = &f32::MAX;
@@ -35,6 +37,12 @@ impl MapBuilder {
 
         let mut mb = architect.new(rng);
         apply_prefab(&mut mb, rng);
+
+        mb.theme = match rng.range(0, 2) {
+            0 => DungeonTheme::new(),
+            _ => ForestTheme::new(),
+        };
+
         mb
     }
 
