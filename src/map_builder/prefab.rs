@@ -58,6 +58,7 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     }
 
     if let Some(placement) = placement {
+        println!("placing prefab to x:{}, y:{}", placement.x, placement.y);
         let string_vec: Vec<char> = FORTRESS
             .chars()
             .filter(|s| *s != '\r' && *s != '\n')
@@ -81,5 +82,7 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
                 i += 1;
             }
         }
+    } else {
+        println!("Failed to place prefab");
     }
 }
