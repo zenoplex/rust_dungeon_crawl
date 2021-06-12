@@ -25,7 +25,7 @@ pub fn spawn_entity(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator
     }
 }
 
-pub fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator) {
+fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator) {
     let (hp, name, glyph) = match rng.range(1, 10) {
         1..=8 => goblin(),
         _ => orc(),
@@ -48,11 +48,11 @@ pub fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator)
     ));
 }
 
-pub fn goblin() -> (i32, String, FontCharType) {
+fn goblin() -> (i32, String, FontCharType) {
     (1, "Goblin".to_string(), to_cp437('g'))
 }
 
-pub fn orc() -> (i32, String, FontCharType) {
+fn orc() -> (i32, String, FontCharType) {
     (2, "Orc".to_string(), to_cp437('o'))
 }
 
@@ -69,7 +69,7 @@ pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
     ));
 }
 
-pub fn spawn_healing_potion(ecs: &mut World, pos: Point) {
+fn spawn_healing_potion(ecs: &mut World, pos: Point) {
     ecs.push((
         Item,
         Name("Healing Potion".to_string()),
@@ -82,7 +82,7 @@ pub fn spawn_healing_potion(ecs: &mut World, pos: Point) {
     ));
 }
 
-pub fn spawn_dungeon_map(ecs: &mut World, pos: Point) {
+fn spawn_dungeon_map(ecs: &mut World, pos: Point) {
     ecs.push((
         Item,
         Name("Dungeon Map".to_string()),
