@@ -3,6 +3,9 @@ use crate::prelude::*;
 #[system]
 #[read_component(Health)]
 #[read_component(Player)]
+#[read_component(Item)]
+#[read_component(Name)]
+#[read_component(Carried)]
 pub fn hud(ecs: &SubWorld) {
     let mut healths = <&Health>::query().filter(component::<Player>());
     let mut draw_batch = DrawBatch::new();
@@ -26,5 +29,18 @@ pub fn hud(ecs: &SubWorld) {
             ColorPair::new(WHITE, RED),
         );
     }
+
+    if let Some((player_entity, _)) = <(Entity, &Player)>::query().iter(ecs).next() {
+        let mut y = 3;
+        <(&Item, &Name, &Carried)>::query()
+            .iter(ecs)
+            .filter(|(_, _, carried)| carried.0 == *player_entity)
+            .enumerate()
+            .for_each(|(i, (_, name, _))| {
+                draw_batch.print(Point::new(3, y), format!("{}:{}", i + 1, name.0));
+                y += i;
+            });
+    };
+
     draw_batch.submit(10000).expect("Batch error");
 }
