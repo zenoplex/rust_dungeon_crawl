@@ -16,6 +16,15 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
     ));
 }
 
+pub fn spawn_entity(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator) {
+    let roll = rng.roll_dice(1, 6);
+    match roll {
+        1 => spawn_healing_potion(ecs, pos),
+        2 => spawn_dungeon_map(ecs, pos),
+        _ => spawn_enemy(ecs, pos, rng),
+    }
+}
+
 pub fn spawn_enemy(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerator) {
     let (hp, name, glyph) = match rng.range(1, 10) {
         1..=8 => goblin(),
