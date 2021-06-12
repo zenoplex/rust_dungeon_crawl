@@ -5,6 +5,8 @@ use crate::prelude::*;
 #[read_component(Player)]
 #[read_component(Enemy)]
 #[write_component(Health)]
+#[write_component(Item)]
+#[write_component(Carried)]
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource] key: &Option<VirtualKeyCode>,
@@ -12,16 +14,31 @@ pub fn player_input(
     commands: &mut CommandBuffer,
 ) {
     if let Some(key) = key {
+        // Query entity with Points and Player only
+        let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
+
         let delta = match key {
             VirtualKeyCode::Left => Point::new(-1, 0),
             VirtualKeyCode::Right => Point::new(1, 0),
             VirtualKeyCode::Up => Point::new(0, -1),
             VirtualKeyCode::Down => Point::new(0, 1),
+            VirtualKeyCode::G => {
+                if let Some((player_entity, player_pos)) = players.iter(ecs).next() {
+                    let mut items = <(Entity, &Item, &Point)>::query();
+                    items
+                        .iter(ecs)
+                        .filter(|(_, _, item_pos)| *item_pos == player_pos)
+                        .for_each(|(item_entity, _, _)| {
+                            // Remove Point so Item will not be rendered
+                            commands.remove_component::<Point>(*item_entity);
+                            commands.add_component(*item_entity, Carried(*player_entity));
+                        });
+                }
+
+                Point::zero()
+            }
             _ => Point::zero(),
         };
-
-        // Query entity with Points and Player only
-        let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
 
         let (player_entity, destination) = players
             .iter(ecs)
