@@ -31,14 +31,13 @@ pub fn hud(ecs: &SubWorld) {
     }
 
     if let Some((player_entity, _)) = <(Entity, &Player)>::query().iter(ecs).next() {
-        let mut y = 3;
+        // Carried does not respect order when Carried is added to entity
         <(&Item, &Name, &Carried)>::query()
             .iter(ecs)
             .filter(|(_, _, carried)| carried.0 == *player_entity)
             .enumerate()
             .for_each(|(i, (_, name, _))| {
-                draw_batch.print(Point::new(3, y), format!("{}:{}", i + 1, name.0));
-                y += i;
+                draw_batch.print(Point::new(3, 3 + i), format!("{}:{}", i + 1, name.0));
             });
     };
 
