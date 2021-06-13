@@ -91,16 +91,6 @@ pub fn player_input(
             }
         }
 
-        if !did_something {
-            if let Ok(mut health) = ecs
-                .entry_mut(player_entity)
-                .unwrap()
-                .get_component_mut::<Health>()
-            {
-                health.current = std::cmp::min(health.current + 1, health.max);
-            }
-        }
-
         // Maybe should give turn only after player delta is arrow key
         *turn_state = TurnState::PlayerTurn;
     }
