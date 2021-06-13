@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[read_component(ActivateItem)]
 #[read_component(ProvidesHealing)]
 #[read_component(ProvidesDungeonMap)]
-#[read_component(Health)]
+#[write_component(Health)]
 pub fn use_item(ecs: &mut SubWorld, commands: &mut CommandBuffer, #[resource] map: &mut Map) {
     let mut healing_to_apply = Vec::<(Entity, i32)>::new();
 
