@@ -84,7 +84,7 @@ impl State {
         map_builder
             .monster_spawns
             .iter()
-            .for_each(|pos| spawn_enemy(&mut ecs, *pos, &mut rng));
+            .for_each(|pos| spawn_entity(&mut ecs, *pos, &mut rng));
 
         resources.insert(map_builder.map);
         resources.insert(Camera::new(map_builder.player_start));
@@ -109,7 +109,7 @@ impl State {
         map_builder
             .monster_spawns
             .iter()
-            .for_each(|pos| spawn_enemy(&mut self.ecs, *pos, &mut rng));
+            .for_each(|pos| spawn_entity(&mut self.ecs, *pos, &mut rng));
 
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(map_builder.player_start));
