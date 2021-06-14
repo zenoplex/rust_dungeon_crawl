@@ -67,6 +67,7 @@ impl GameState for State {
                 .execute(&mut self.ecs, &mut self.resources),
             TurnState::GameOver => self.game_over(ctx),
             TurnState::Victory => self.victory(ctx),
+            TurnState::NextLevel => self.advance_level(),
         }
 
         render_draw_buffer(ctx).expect("Render error");
@@ -168,6 +169,10 @@ impl State {
         if let Some(VirtualKeyCode::Key1) = ctx.key {
             self.reset_game_state();
         }
+    }
+
+    fn advance_level(&mut self) {
+        // TODO:
     }
 }
 
