@@ -25,6 +25,7 @@ mod prelude {
 }
 
 use prelude::*;
+use std::collections::HashSet;
 
 struct State {
     ecs: World,
@@ -172,7 +173,24 @@ impl State {
     }
 
     fn advance_level(&mut self) {
-        // TODO:
+        if let Some(player_entity) = <Entity>::query()
+            .filter(component::<Player>())
+            .iter(&self.ecs)
+            .next()
+        {
+            // HashSet needs to be a copy not a reference
+            let mut entities_to_keep: HashSet<Entity> = HashSet::new();
+            entities_to_keep.insert(*player_entity);
+
+            <(Entity, &Carried)>::query()
+                .iter(&self.ecs)
+                .filter(|(_, carried)| carried.0 == *player_entity)
+                .for_each(|(entity, _)| {
+                    entities_to_keep.insert(*entity);
+                });
+
+            println!("{:?}", entities_to_keep);
+        }
     }
 }
 
