@@ -17,16 +17,17 @@ pub fn end_turn(ecs: &SubWorld, #[resource] turn_state: &mut TurnState) {
         _ => *turn_state,
     };
 
+    let amulet_default = Point::new(-1, -1);
+    let amulet_pos = amulet.iter(ecs).next().unwrap_or(&amulet_default);
+
     // Set state to GameOver if player health is less than 1
     players.iter(ecs).for_each(|(health, pos)| {
         if health.current < 1 {
             new_state = TurnState::GameOver;
         }
 
-        if let Some(amulet_pos) = amulet.iter(ecs).next() {
-            if amulet_pos == pos {
-                new_state = TurnState::Victory;
-            }
+        if amulet_pos == pos {
+            new_state = TurnState::Victory;
         }
     });
 
