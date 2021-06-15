@@ -181,6 +181,7 @@ impl State {
         {
             // HashSet needs to be a copy not a reference
             let mut entities_to_keep: HashSet<Entity> = HashSet::new();
+            // Save player entity
             entities_to_keep.insert(*player_entity);
 
             <(Entity, &Carried)>::query()
@@ -208,6 +209,7 @@ impl State {
             let mut rng = RandomNumberGenerator::new();
             let mut map_builder = MapBuilder::new(&mut rng);
             let mut map_level = 0;
+
             <(&mut Player, &mut Point)>::query()
                 .iter_mut(&mut self.ecs)
                 .for_each(|(player, pos)| {
@@ -216,6 +218,13 @@ impl State {
                     pos.x = map_builder.player_start.x;
                     pos.y = map_builder.player_start.y;
                 });
+
+            if map_level == 2 {
+                spawn_amulet_of_yala(&mut self.ecs, map_builder.amulet_start);
+            } else {
+                let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
+                map_builder.map.tiles[exit_idx] = TileType::Exit;
+            }
 
             map_builder
                 .monster_spawns
