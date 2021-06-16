@@ -30,7 +30,14 @@ pub fn hud(ecs: &SubWorld) {
         );
     }
 
-    if let Some((player_entity, _)) = <(Entity, &Player)>::query().iter(ecs).next() {
+    if let Some((player_entity, player)) = <(Entity, &Player)>::query().iter(ecs).next() {
+        // Print map level
+        draw_batch.print_color_right(
+            Point::new(SCREEN_WIDTH * 2, 1),
+            format!("Dungeon level: {}", player.map_level + 1),
+            ColorPair::new(YELLOW, BLACK),
+        );
+
         // Carried does not respect order when Carried is added to entity
         <(&Item, &Name, &Carried)>::query()
             .iter(ecs)
