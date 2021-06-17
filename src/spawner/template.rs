@@ -56,11 +56,42 @@ impl Templates {
         spawn_points.iter().for_each(|pos| {
             // Choose random entity from vector
             if let Some(entity) = rng.random_slice_entry(&available_entities) {
-                // TODO: Spawn entity
+                self.spawn_entity(pos, entity, &mut commands);
             }
         });
 
         // Apply command buffer
         commands.flush(ecs, resources);
+    }
+
+    pub fn spawn_entity(&self, pos: &Point, template: &Template, commands: &mut CommandBuffer) {
+        let ent = commands.push((
+            (),
+            *pos,
+            Name(template.name.clone()),
+            Render {
+                glyph: to_cp437(template.glyph),
+                color: ColorPair::new(WHITE, BLACK),
+            },
+        ));
+
+        match template.entity_type {
+            EntityType::Item => {
+                commands.add_component(ent, Item {});
+                // TODO implement item effect
+            }
+            EntityType::Enemy => {
+                commands.add_component(ent, Enemy {});
+                commands.add_component(ent, ChasingPlayer);
+                commands.add_component(ent, FieldOfView::new(6));
+                commands.add_component(
+                    ent,
+                    Health {
+                        current: template.hp.unwrap(),
+                        max: template.hp.unwrap(),
+                    },
+                );
+            }
+        }
     }
 }
