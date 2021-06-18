@@ -13,7 +13,7 @@ pub struct Template {
     pub frequency: i32,
     pub name: String,
     pub glyph: char,
-    pub provies: Option<Vec<(String, i32)>>,
+    pub provides: Option<Vec<(String, i32)>>,
     pub hp: Option<i32>,
 }
 
@@ -78,7 +78,24 @@ impl Templates {
         match template.entity_type {
             EntityType::Item => {
                 commands.add_component(ent, Item {});
-                // TODO implement item effect
+
+                if let Some(effects) = &template.provides {
+                    effects
+                        .iter()
+                        .for_each(|(provide, n)| match provide.as_str() {
+                            "Healing" => {
+                                commands.add_component(ent, ProvidesHealing { amount: *n });
+                            }
+                            "MagicMap" => {
+                                commands.add_component(ent, ProvidesDungeonMap);
+                            }
+                            _ => {
+                                println!("Warning: effect type not found.");
+                            }
+                        })
+                } else {
+                    println!("huh");
+                }
             }
             EntityType::Enemy => {
                 commands.add_component(ent, Enemy {});
