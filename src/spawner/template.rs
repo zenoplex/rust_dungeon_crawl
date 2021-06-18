@@ -4,7 +4,6 @@ use ron::de::from_reader;
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::fs::File;
-use std::process::Command;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Template {
@@ -93,8 +92,6 @@ impl Templates {
                                 println!("Warning: effect type not found.");
                             }
                         })
-                } else {
-                    println!("huh");
                 }
             }
             EntityType::Enemy => {

@@ -31,8 +31,6 @@ pub fn use_item(ecs: &mut SubWorld, commands: &mut CommandBuffer, #[resource] ma
 
     healing_to_apply.iter().for_each(|(entity, amount)| {
         if let Ok(mut target) = ecs.entry_mut(*entity) {
-            let h = target.get_component::<Health>().unwrap();
-
             if let Ok(health) = target.get_component_mut::<Health>() {
                 println!("{}, {}", health.current, amount);
                 health.current = i32::min(health.max, health.current + amount);
