@@ -75,6 +75,15 @@ impl Templates {
             },
         ));
 
+        if let Some(damage) = &template.base_damage {
+            commands.add_component(ent, Damage(*damage));
+
+            // If entity has base_damage and an Item then it is an Weapon
+            if template.entity_type == EntityType::Item {
+                commands.add_component(ent, Weapon);
+            }
+        }
+
         match template.entity_type {
             EntityType::Item => {
                 commands.add_component(ent, Item {});
