@@ -41,10 +41,11 @@ Templates(
     ),
     Template(
       entity_type: Enemy,
-      name: "Ettub", glyph: 'E', levels: [0,1,2],
+      name: "Ettub", glyph: 'E', levels: [2],
       hp: Some(10),
-      frequency: 2,
+      frequency: 1,
       base_damage: Some(3),
     )
+    Template
   ]
 )
