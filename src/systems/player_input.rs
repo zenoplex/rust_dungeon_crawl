@@ -55,8 +55,6 @@ pub fn player_input(
 
         let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());
 
-        let mut did_something = false;
-
         if delta != Point::zero() {
             let mut hit_something = false;
 
@@ -65,9 +63,6 @@ pub fn player_input(
                 .filter(|(_, pos)| **pos == destination)
                 .for_each(|(enemy_entity, _)| {
                     hit_something = true;
-                    did_something = true;
-
-                    println!("hit");
 
                     commands.push((
                         (),
