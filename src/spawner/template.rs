@@ -14,6 +14,7 @@ pub struct Template {
     pub glyph: char,
     pub provides: Option<Vec<(String, i32)>>,
     pub hp: Option<i32>,
+    pub base_damage: Option<i32>,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq)]
@@ -73,6 +74,15 @@ impl Templates {
                 color: ColorPair::new(WHITE, BLACK),
             },
         ));
+
+        if let Some(damage) = &template.base_damage {
+            commands.add_component(ent, Damage(*damage));
+
+            // If entity has base_damage and an Item then it is an Weapon
+            if template.entity_type == EntityType::Item {
+                commands.add_component(ent, Weapon);
+            }
+        }
 
         match template.entity_type {
             EntityType::Item => {

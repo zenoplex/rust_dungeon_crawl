@@ -7,6 +7,7 @@ use crate::prelude::*;
 #[write_component(Health)]
 #[write_component(Item)]
 #[write_component(Carried)]
+#[write_component(Weapon)]
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource] key: &Option<VirtualKeyCode>,
@@ -32,6 +33,16 @@ pub fn player_input(
                             // Remove Point so Item will not be rendered
                             commands.remove_component::<Point>(*item_entity);
                             commands.add_component(*item_entity, Carried(*player_entity));
+
+                            // if Carried is an Weapon then remove other weapon from inventory
+                            if let Ok(item_entry_ref) = ecs.entry_ref(*item_entity) {
+                                if item_entry_ref.get_component::<Weapon>().is_ok() {
+                                    <(Entity, &Carried, &Weapon)>::query()
+                                        .iter(ecs)
+                                        .filter(|(_, carried, _)| carried.0 == *player_entity)
+                                        .for_each(|(ent, _, _)| commands.remove(*ent));
+                                }
+                            }
                         });
                 }
 
@@ -55,8 +66,6 @@ pub fn player_input(
 
         let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());
 
-        let mut did_something = false;
-
         if delta != Point::zero() {
             let mut hit_something = false;
 
@@ -65,9 +74,6 @@ pub fn player_input(
                 .filter(|(_, pos)| **pos == destination)
                 .for_each(|(enemy_entity, _)| {
                     hit_something = true;
-                    did_something = true;
-
-                    println!("hit");
 
                     commands.push((
                         (),
